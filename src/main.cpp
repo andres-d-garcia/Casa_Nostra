@@ -41,6 +41,17 @@ public:
 };
 
 
+// CLASE NODO ARBOL
+class NodoArbol {
+public:
+    Persona dato;
+    NodoArbol *padre;
+    NodoArbol *izquierdo;
+    NodoArbol *derecho;
+
+    explicit NodoArbol(const Persona &pDato)
+        : dato(pDato), padre(nullptr), izquierdo(nullptr), derecho(nullptr) {}
+};
 
 
 
