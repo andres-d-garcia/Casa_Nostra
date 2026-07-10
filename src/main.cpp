@@ -53,6 +53,181 @@ public:
         : dato(pDato), padre(nullptr), izquierdo(nullptr), derecho(nullptr) {}
 };
 
+// CLASE ARBOL FAMILIA
+class ArbolFamilia {
+private:
+    NodoArbol *raiz;
+
+    NodoArbol *buscarPorId(NodoArbol *actual, int id) {
+        if (actual == nullptr) {
+            return nullptr;
+        }
+
+        if (actual->dato.id == id) {
+            return actual;
+        }
+
+        NodoArbol *izquierdoEncontrado = buscarPorId(actual->izquierdo, id);
+        if (izquierdoEncontrado != nullptr) {
+            return izquierdoEncontrado;
+        }
+
+        return buscarPorId(actual->derecho, id);
+    }
+
+    void destruir(NodoArbol *actual) {
+        if (actual == nullptr) {
+            return;
+        }
+
+        destruir(actual->izquierdo);
+        destruir(actual->derecho);
+        delete actual;
+    }
+
+public:
+    ArbolFamilia() : raiz(nullptr) {}
+
+    ~ArbolFamilia() {
+        destruir(raiz);
+    }
+
+    void insertar(const Persona &persona) {
+        NodoArbol *nuevo = new NodoArbol(persona);
+
+        if (raiz == nullptr) {
+            raiz = nuevo;
+            return;
+        }
+
+        NodoArbol *padre = buscarPorId(raiz, persona.id_boss);
+        if (padre == nullptr) {
+            nuevo->padre = nullptr;
+            if (raiz->izquierdo == nullptr) {
+                raiz->izquierdo = nuevo;
+            } else {
+                raiz->derecho = nuevo;
+            }
+            return;
+        }
+
+        nuevo->padre = padre;
+        if (padre->izquierdo == nullptr) {
+            padre->izquierdo = nuevo;
+        } else if (padre->derecho == nullptr) {
+            padre->derecho = nuevo;
+        } else {
+            padre->derecho->derecho = nuevo;
+        }
+    }
+
+    bool cargarDesdeCsv(const string &rutaArchivo) {
+        ifstream archivo(rutaArchivo);
+        if (!archivo.is_open()) {
+            return false;
+        }
+
+        string linea;
+        getline(archivo, linea);
+
+        while (getline(archivo, linea)) {
+            if (trim(linea).empty()) {
+                continue;
+            }
+
+            stringstream ss(linea);
+            string campo;
+            Persona persona;
+            int index = 0;
+
+            while (getline(ss, campo, ',')) {
+                campo = trim(campo);
+
+                switch (index) {
+                case 0:
+                    persona.id = stoi(campo);
+                    break;
+                case 1:
+                    persona.name = campo;
+                    break;
+                case 2:
+                    persona.last_name = campo;
+                    break;
+                case 3:
+                    persona.gender = campo[0];
+                    break;
+                case 4:
+                    persona.age = stoi(campo);
+                    break;
+                case 5:
+                    persona.id_boss = stoi(campo);
+                    break;
+                case 6:
+                    persona.is_dead = (campo == "1");
+                    break;
+                case 7:
+                    persona.in_jail = (campo == "1");
+                    break;
+                case 8:
+                    persona.was_boss = (campo == "1");
+                    break;
+                case 9:
+                    persona.is_boss = (campo == "1");
+                    break;
+                }
+
+                ++index;
+            }
+
+            insertar(persona);
+        }
+
+        archivo.close();
+        return true;
+    }
+
+    void mostrarSucesionActual() const {
+        cout << "Linea de sucesion actual:" << endl;
+        mostrarEnOrden(raiz);
+    }
+
+    void mostrarEnOrden(NodoArbol *actual) const {
+        if (actual == nullptr) {
+            return;
+        }
+
+        mostrarEnOrden(actual->izquierdo);
+        if (!actual->dato.is_dead && !actual->dato.in_jail) {
+            cout << actual->dato.id << " - " << actual->dato.name << " "
+                 << actual->dato.last_name << endl;
+        }
+        mostrarEnOrden(actual->derecho);
+    }
+
+    NodoArbol *encontrarPorId(int id) {
+        return buscarPorId(raiz, id);
+    }
+
+    bool editarNodo(int id, const Persona &nuevaInformacion) {
+        NodoArbol *nodo = encontrarPorId(id);
+        if (nodo == nullptr) {
+            return false;
+        }
+
+        nodo->dato.name = nuevaInformacion.name;
+        nodo->dato.last_name = nuevaInformacion.last_name;
+        nodo->dato.gender = nuevaInformacion.gender;
+        nodo->dato.age = nuevaInformacion.age;
+        nodo->dato.is_dead = nuevaInformacion.is_dead;
+        nodo->dato.in_jail = nuevaInformacion.in_jail;
+        nodo->dato.was_boss = nuevaInformacion.was_boss;
+        nodo->dato.is_boss = nuevaInformacion.is_boss;
+        nodo->dato.id_boss = nuevaInformacion.id_boss;
+        return true;
+    }
+};
+
+
 
 
 
