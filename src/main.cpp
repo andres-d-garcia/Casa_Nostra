@@ -14,6 +14,7 @@ string trim(const string &value) {
     return value.substr(start, end - start + 1);
 }
 
+// CLASE PERSONA
 class Persona {
 public:
     int id;
@@ -39,6 +40,8 @@ public:
           is_boss(pIsBoss) {}
 };
 
+
+// CLASE NODO ARBOL
 class NodoArbol {
 public:
     Persona dato;
@@ -50,6 +53,7 @@ public:
         : dato(pDato), padre(nullptr), izquierdo(nullptr), derecho(nullptr) {}
 };
 
+// CLASE ARBOL FAMILIA
 class ArbolFamilia {
 private:
     NodoArbol *raiz;
@@ -223,17 +227,7 @@ public:
     }
 };
 
-int main() {
-    ArbolFamilia familia;
 
-    if (!familia.cargarDesdeCsv("bin/datos.csv")) {
-        cout << "No se encontro el archivo CSV. Se cargaran datos de prueba." << endl;
-        familia.insertar(Persona(1, "Vito", "Corleone", 'M', 80, 0, false, false, true, true));
-        familia.insertar(Persona(2, "Michael", "Corleone", 'M', 45, 1, false, false, false, false));
-        familia.insertar(Persona(3, "Fredo", "Corleone", 'M', 60, 1, false, true, false, false));
-        familia.insertar(Persona(4, "Connie", "Corleone", 'F', 55, 1, false, false, false, false));
-    }
 
-    familia.mostrarSucesionActual();
-    return 0;
-}
+
+
