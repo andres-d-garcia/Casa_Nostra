@@ -16,7 +16,7 @@
 - [x] Convertir los datos en nodos del árbol
 
 ## 4. Funcionalidades principales
-- [ ] Mostrar la línea de sucesión actual solo para los vivos
+- [x] Mostrar la línea de sucesión actual solo para los vivos
 - [ ] Asignar automáticamente un nuevo jefe cuando el actual muere
 - [ ] Aplicar las reglas de sucesión del documento de requisitos
 - [ ] Cambiar datos de cualquier nodo excepto id e id del padre

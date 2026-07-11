@@ -57,6 +57,7 @@ public:
 class ArbolFamilia {
 private:
     NodoArbol *raiz;
+    NodoArbol *jefeActual;
 
     NodoArbol *buscarPorId(NodoArbol *actual, int id) {
         if (actual == nullptr) {
@@ -85,8 +86,48 @@ private:
         delete actual;
     }
 
+    void _mostrarSucesoresVivos(NodoArbol *nodo, int nivel) const {
+        if (nodo == nullptr) {
+            return;
+        }
+
+        
+        if (nodo->dato.is_dead == 0) {
+            
+            for (int i = 0; i < nivel; ++i) {
+                cout << "  ";
+            }
+
+            cout << "- " << nodo->dato.name << " " << nodo->dato.last_name
+                 << " (Edad: " << nodo->dato.age << ")";
+
+            if (nodo->dato.is_boss == 1) {
+                cout << " <-- JEFE ACTUAL";
+            }
+            cout << endl;
+        }
+
+        
+        _mostrarSucesoresVivos(nodo->izquierdo, nivel + 1);
+        _mostrarSucesoresVivos(nodo->derecho, nivel + 1);
+    }
+
+    NodoArbol *_buscarJefe(NodoArbol *nodo) {
+        if (nodo == nullptr) {
+            return nullptr;
+        }
+        if (nodo->dato.is_boss) {
+            return nodo;
+        }
+        NodoArbol *encontrado = _buscarJefe(nodo->izquierdo);
+        if (encontrado != nullptr) {
+            return encontrado;
+        }
+        return _buscarJefe(nodo->derecho);
+    }
+
 public:
-    ArbolFamilia() : raiz(nullptr) {}
+    ArbolFamilia() : raiz(nullptr), jefeActual(nullptr) {}
 
     ~ArbolFamilia() {
         destruir(raiz);
@@ -183,25 +224,21 @@ public:
         }
 
         archivo.close();
+        jefeActual = _buscarJefe(raiz);
         return true;
     }
 
-    void mostrarSucesionActual() const {
-        cout << "Linea de sucesion actual:" << endl;
-        mostrarEnOrden(raiz);
-    }
-
-    void mostrarEnOrden(NodoArbol *actual) const {
-        if (actual == nullptr) {
+    void mostrarLineaDeSucesion() const {
+        if (jefeActual == nullptr) {
+            cout << "No se ha asignado un jefe actual en la familia." << endl;
             return;
         }
 
-        mostrarEnOrden(actual->izquierdo);
-        if (!actual->dato.is_dead && !actual->dato.in_jail) {
-            cout << actual->dato.id << " - " << actual->dato.name << " "
-                 << actual->dato.last_name << endl;
-        }
-        mostrarEnOrden(actual->derecho);
+        cout << "\n--- Línea de Sucesión Actual (solo miembros vivos) ---\n"
+             << endl;
+        _mostrarSucesoresVivos(jefeActual, 0);
+        cout << "\n-----------------------------------------------------\n"
+             << endl;
     }
 
     NodoArbol *encontrarPorId(int id) {
@@ -226,8 +263,3 @@ public:
         return true;
     }
 };
-
-
-
-
-
