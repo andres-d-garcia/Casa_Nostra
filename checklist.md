@@ -1,19 +1,19 @@
 # Checklist del proyecto
 
 ## 1. Estructura base
-- [ ] Crear la estructura de carpetas del proyecto: bin y src
-- [ ] Mantener el código fuente en src
-- [ ] Mantener el ejecutable y los datos en bin
+- [x] Crear la estructura de carpetas del proyecto: bin y src
+- [x] Mantener el código fuente en src
+- [x] Mantener el ejecutable y los datos en bin
 
 ## 2. Modelado del árbol
-- [ ] Definir la clase Persona con todos los atributos del CSV
-- [ ] Definir la clase NodoArbol con punteros a padre, izquierdo y derecho
-- [ ] Definir la clase ArbolFamilia para administrar el árbol
+- [x] Definir la clase Persona con todos los atributos del CSV
+- [x] Definir la clase NodoArbol con punteros a padre, izquierdo y derecho
+- [x] Definir la clase ArbolFamilia para administrar el árbol
 
 ## 3. Carga de datos
-- [ ] Leer datos desde un archivo CSV
-- [ ] Parsear correctamente cada columna del CSV
-- [ ] Convertir los datos en nodos del árbol
+- [x] Leer datos desde un archivo CSV
+- [x] Parsear correctamente cada columna del CSV
+- [x] Convertir los datos en nodos del árbol
 
 ## 4. Funcionalidades principales
 - [ ] Mostrar la línea de sucesión actual solo para los vivos
