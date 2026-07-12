@@ -126,25 +126,23 @@ private:
         return _buscarJefe(nodo->derecho);
     }
 
-    NodoArbol *_buscarSucesorEnSubarbol(NodoArbol *subRaiz) {
+    NodoArbol *_buscarSucesorEnSubarbol(NodoArbol *subRaiz, bool incluirPresos) {
         if (subRaiz == nullptr) {
             return nullptr;
         }
 
-        // Pre-order traversal
-        // Check current node
-        if (!subRaiz->dato.is_dead && !subRaiz->dato.in_jail) {
+        bool esValido = !subRaiz->dato.is_dead && (incluirPresos || !subRaiz->dato.in_jail);
+
+        if (esValido) {
             return subRaiz;
         }
 
-        // Recur on left child
-        NodoArbol *sucesor = _buscarSucesorEnSubarbol(subRaiz->izquierdo);
+        NodoArbol *sucesor = _buscarSucesorEnSubarbol(subRaiz->izquierdo, incluirPresos);
         if (sucesor != nullptr) {
             return sucesor;
         }
 
-        // Recur on right child
-        return _buscarSucesorEnSubarbol(subRaiz->derecho);
+        return _buscarSucesorEnSubarbol(subRaiz->derecho, incluirPresos);
     }
 
     void asignarNuevoJefe(NodoArbol *nuevoJefe, NodoArbol *antiguoJefe) {
@@ -167,7 +165,6 @@ private:
                     "familia."
                  << endl;
             if (antiguoJefe != nullptr) {
-                // El antiguo jefe ya no es jefe, pero no hay reemplazo.
                 jefeActual = nullptr;
             }
         }
@@ -312,37 +309,33 @@ public:
         NodoArbol *antiguoJefe = jefeActual;
         NodoArbol *nuevoJefe = nullptr;
 
-        // Regla: Si el jefe muere/va a prisión/envejece, el sucesor es el
-        // primer sucesor vivo y libre en su árbol.
-        nuevoJefe = _buscarSucesorEnSubarbol(antiguoJefe->izquierdo);
-        if (nuevoJefe == nullptr) {
-            nuevoJefe = _buscarSucesorEnSubarbol(antiguoJefe->derecho);
-        }
+        for (int i = 0; i < 2 && nuevoJefe == nullptr; ++i) {
+            bool incluirPresos = (i == 1);
+            if (incluirPresos) {
+                cout << "No se encontraron sucesores libres. Ampliando la búsqueda para incluir miembros encarcelados..." << endl;
+            }
 
-        // Regla: Si no hay sucesores directos, buscar en el árbol del "hermano"
-        // del jefe, subiendo en la jerarquía.
-        if (nuevoJefe == nullptr) {
-            NodoArbol *ancestro = antiguoJefe;
-            while (ancestro->padre != nullptr && nuevoJefe == nullptr) {
-                NodoArbol *padreAncestro = ancestro->padre;
-                NodoArbol *tio = (padreAncestro->izquierdo == ancestro)
-                                     ? padreAncestro->derecho
-                                     : padreAncestro->izquierdo;
+            nuevoJefe = _buscarSucesorEnSubarbol(antiguoJefe->izquierdo, incluirPresos);
+            if (nuevoJefe == nullptr) {
+                nuevoJefe = _buscarSucesorEnSubarbol(antiguoJefe->derecho, incluirPresos);
+            }
 
-                if (tio != nullptr) {
-                    // Buscar un sucesor en el subárbol del "tío"
-                    nuevoJefe = _buscarSucesorEnSubarbol(tio);
+            if (nuevoJefe == nullptr) {
+                NodoArbol *ancestro = antiguoJefe;
+                while (ancestro->padre != nullptr && nuevoJefe == nullptr) {
+                    NodoArbol *padreAncestro = ancestro->padre;
+                    NodoArbol *tio = (padreAncestro->izquierdo == ancestro)
+                                         ? padreAncestro->derecho
+                                         : padreAncestro->izquierdo;
 
-                    // Regla: Si el "tío" está vivo y libre y no tiene
-                    // sucesores válidos, él se convierte en jefe.
-                    if (nuevoJefe == nullptr && !tio->dato.is_dead &&
-                        !tio->dato.in_jail) {
-                        nuevoJefe = tio;
+                    if (tio != nullptr) {
+                        nuevoJefe = _buscarSucesorEnSubarbol(tio, incluirPresos);
                     }
+                    ancestro = padreAncestro;
                 }
-                ancestro = padreAncestro;
             }
         }
+
         asignarNuevoJefe(nuevoJefe, antiguoJefe);
     }
 

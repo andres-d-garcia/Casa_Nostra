@@ -17,8 +17,8 @@
 
 ## 4. Funcionalidades principales
 - [x] Mostrar la línea de sucesión actual solo para los vivos
-- [ ] Asignar automáticamente un nuevo jefe cuando el actual muere
-- [ ] Aplicar las reglas de sucesión del documento de requisitos
+- [x] Asignar automáticamente un nuevo jefe cuando el actual muere
+- [x] Aplicar las reglas de sucesión del documento de requisitos
 - [ ] Cambiar datos de cualquier nodo excepto id e id del padre
 
 ## 5. Datos de prueba
