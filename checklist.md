@@ -22,12 +22,12 @@
 - [x] Cambiar datos de cualquier nodo excepto id e id del padre
 
 ## 5. Datos de prueba
-- [ ] Crear un archivo CSV con datos de ejemplo para probar la aplicación
-- [ ] Verificar que el programa cargue correctamente los datos
+- [x] Crear un archivo CSV con datos de ejemplo para probar la aplicación
+- [x] Verificar que el programa cargue correctamente los datos
 
 ## 6. Documentación
-- [ ] Crear un README.md con una explicación del proyecto
-- [ ] Explicar cómo compilar y ejecutar la aplicación
+- [] Crear un README.md con una explicación del proyecto
+- [x] Explicar cómo compilar y ejecutar la aplicación
 
 ## 7. Verificación final
 - [ ] Compilar el proyecto sin errores
