@@ -19,7 +19,7 @@
 - [x] Mostrar la línea de sucesión actual solo para los vivos
 - [x] Asignar automáticamente un nuevo jefe cuando el actual muere
 - [x] Aplicar las reglas de sucesión del documento de requisitos
-- [ ] Cambiar datos de cualquier nodo excepto id e id del padre
+- [x] Cambiar datos de cualquier nodo excepto id e id del padre
 
 ## 5. Datos de prueba
 - [ ] Crear un archivo CSV con datos de ejemplo para probar la aplicación

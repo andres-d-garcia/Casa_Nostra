@@ -355,12 +355,25 @@ public:
         nodo->dato.age = nuevaInformacion.age;
         nodo->dato.is_dead = nuevaInformacion.is_dead;
         nodo->dato.in_jail = nuevaInformacion.in_jail;
-        nodo->dato.was_boss = nuevaInformacion.was_boss;
-        nodo->dato.is_boss = nuevaInformacion.is_boss;
-        nodo->dato.id_boss = nuevaInformacion.id_boss;
+        // El id y el id_boss no se pueden modificar según los requisitos.
+        // Los estados is_boss y was_boss son manejados por la lógica de sucesión.
         return true;
     }
 };
+
+void mostrarDetallesPersona(const Persona& p) {
+    cout << "\n--- Detalles del Miembro ---" << endl;
+    cout << "ID: " << p.id << endl;
+    cout << "Nombre: " << p.name << " " << p.last_name << endl;
+    cout << "Género: " << p.gender << endl;
+    cout << "Edad: " << p.age << endl;
+    cout << "ID Jefe: " << p.id_boss << endl;
+    cout << "Estado: " << (p.is_dead ? "Muerto" : "Vivo") << endl;
+    cout << "Situación: " << (p.in_jail ? "En la cárcel" : "Libre") << endl;
+    cout << "Jefe actual: " << (p.is_boss ? "Sí" : "No") << endl;
+    cout << "Fue jefe: " << (p.was_boss ? "Sí" : "No") << endl;
+    cout << "---------------------------\n";
+}
 
 int main() {
     ArbolFamilia familia;
@@ -394,19 +407,77 @@ int main() {
                 NodoArbol *nodo = familia.encontrarPorId(id_to_edit);
                 if (nodo) {
                     Persona p = nodo->dato;
-                    cout << "Modificando a " << p.name
-                         << ". Marcar como muerto? (1=si, 0=no): ";
+                    mostrarDetallesPersona(p);
+
+                    cout << "--- Menú de Edición ---" << endl;
+                    cout << "1. Editar nombre" << endl;
+                    cout << "2. Editar apellido" << endl;
+                    cout << "3. Editar género" << endl;
+                    cout << "4. Editar edad" << endl;
+                    cout << "5. Cambiar estado (muerto/vivo)" << endl;
+                    cout << "6. Cambiar situación (cárcel/libre)" << endl;
+                    cout << "7. Cancelar" << endl;
+                    cout << "Seleccione el campo a modificar: ";
                     getline(cin, input);
+
+                    string newValue;
+                    bool cambioRealizado = false;
+
                     if (input == "1") {
-                        p.is_dead = true;
+                        cout << "Nuevo nombre: ";
+                        getline(cin, p.name);
+                        cambioRealizado = true;
+                    } else if (input == "2") {
+                        cout << "Nuevo apellido: ";
+                        getline(cin, p.last_name);
+                        cambioRealizado = true;
+                    } else if (input == "3") {
+                        cout << "Nuevo género (H/M): ";
+                        getline(cin, newValue);
+                        if (!newValue.empty() && (toupper(newValue[0]) == 'H' || toupper(newValue[0]) == 'M')) {
+                            p.gender = toupper(newValue[0]);
+                            cambioRealizado = true;
+                        } else {
+                            cout << "Género inválido. No se realizaron cambios." << endl;
+                        }
+                    } else if (input == "4") {
+                        cout << "Nueva edad: ";
+                        getline(cin, newValue);
+                        try {
+                            p.age = stoi(newValue);
+                            cambioRealizado = true;
+                        } catch (const std::invalid_argument &ia) {
+                            cout << "Edad inválida. No se realizaron cambios." << endl;
+                        }
+                    } else if (input == "5") {
+                        cout << "¿Está muerto? (1=si, 0=no): ";
+                        getline(cin, newValue);
+                        if (newValue == "1" || newValue == "0") {
+                            p.is_dead = (newValue == "1");
+                            cambioRealizado = true;
+                        } else {
+                            cout << "Opción inválida. No se realizaron cambios." << endl;
+                        }
+                    } else if (input == "6") {
+                        cout << "¿Está en la cárcel? (1=si, 0=no): ";
+                        getline(cin, newValue);
+                        if (newValue == "1" || newValue == "0") {
+                            p.in_jail = (newValue == "1");
+                            cambioRealizado = true;
+                        } else {
+                            cout << "Opción inválida. No se realizaron cambios." << endl;
+                        }
+                    }
+
+                    if (cambioRealizado) {
                         familia.editarNodo(id_to_edit, p);
-                        cout << p.name << " ha sido marcado como muerto." << endl;
+                        cout << "Miembro actualizado exitosamente." << endl;
                     }
                 } else {
                     cout << "ID no encontrado." << endl;
                 }
             } catch (const std::invalid_argument &ia) {
-                cerr << "Entrada inválida. Por favor ingrese un número." << endl;
+                cerr << "Entrada inválida. Por favor ingrese un número para el ID." << endl;
             }
         } else if (input == "3") {
             familia.resolverSucesion();
