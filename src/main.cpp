@@ -183,6 +183,18 @@ public:
 
         if (raiz == nullptr) {
             raiz = nuevo;
+            if (persona.id_boss == 0) {
+                raiz = nuevo;
+            } else {
+                cerr << "Error: El árbol está vacío, pero el primer miembro (ID: " << persona.id << ") no es el jefe principal (id_boss != 0)." << endl;
+                delete nuevo;
+            }
+            return;
+        }
+
+        if (persona.id_boss == 0) {
+            cerr << "Error: Se encontró un segundo miembro (ID: " << persona.id << ") con id_boss=0. Solo puede haber una raíz." << endl;
+            delete nuevo;
             return;
         }
 
@@ -194,6 +206,9 @@ public:
             } else {
                 raiz->derecho = nuevo;
             }
+            cerr << "Error de inserción: No se encontró el padre con ID " << persona.id_boss << " para el miembro " << persona.name << " (ID: " << persona.id << ")." << endl;
+            cerr << "Asegúrese de que el archivo CSV esté ordenado jerárquicamente (padres antes que hijos)." << endl;
+            delete nuevo;
             return;
         }
 
@@ -204,6 +219,11 @@ public:
             padre->derecho = nuevo;
         } else {
             padre->derecho->derecho = nuevo;
+            cerr << "Error de estructura: El padre ID " << padre->dato.id 
+                 << " (" << padre->dato.name << ") ya tiene dos sucesores directos." << endl;
+            cerr << "No se puede insertar a " << persona.name << " (ID: " << persona.id 
+                 << ") como tercer sucesor directo. El modelo actual es un árbol binario." << endl;
+            delete nuevo;
         }
     }
 
