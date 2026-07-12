@@ -126,6 +126,54 @@ private:
         return _buscarJefe(nodo->derecho);
     }
 
+    NodoArbol *_buscarSucesorEnSubarbol(NodoArbol *subRaiz) {
+        if (subRaiz == nullptr) {
+            return nullptr;
+        }
+
+        // Pre-order traversal
+        // Check current node
+        if (!subRaiz->dato.is_dead && !subRaiz->dato.in_jail) {
+            return subRaiz;
+        }
+
+        // Recur on left child
+        NodoArbol *sucesor = _buscarSucesorEnSubarbol(subRaiz->izquierdo);
+        if (sucesor != nullptr) {
+            return sucesor;
+        }
+
+        // Recur on right child
+        return _buscarSucesorEnSubarbol(subRaiz->derecho);
+    }
+
+    void asignarNuevoJefe(NodoArbol *nuevoJefe, NodoArbol *antiguoJefe) {
+        if (antiguoJefe != nullptr) {
+            antiguoJefe->dato.is_boss = false;
+            antiguoJefe->dato.was_boss = true;
+            cout << "El antiguo jefe, " << antiguoJefe->dato.name << " "
+                 << antiguoJefe->dato.last_name << ", ha dejado el puesto." << endl;
+        }
+
+        if (nuevoJefe != nullptr) {
+            nuevoJefe->dato.is_boss = true;
+            jefeActual = nuevoJefe;
+
+            cout << "\n¡NUEVO JEFE ASIGNADO!" << endl;
+            cout << "El nuevo jefe de la familia es: " << nuevoJefe->dato.name << " "
+                 << nuevoJefe->dato.last_name << endl;
+        } else {
+            cout << "\nCRISIS DE SUCESIÓN: No se pudo encontrar un nuevo jefe para la "
+                    "familia."
+                 << endl;
+            if (antiguoJefe != nullptr) {
+                // El antiguo jefe ya no es jefe, pero no hay reemplazo.
+                jefeActual = nullptr;
+            }
+        }
+    }
+
+
 public:
     ArbolFamilia() : raiz(nullptr), jefeActual(nullptr) {}
 
@@ -241,6 +289,63 @@ public:
              << endl;
     }
 
+    void resolverSucesion() {
+        if (jefeActual == nullptr) {
+            cout << "No hay un jefe actual para resolver la sucesión." << endl;
+            return;
+        }
+
+        bool necesitaSucesor = jefeActual->dato.is_dead ||
+                               jefeActual->dato.in_jail ||
+                               jefeActual->dato.age > 70;
+
+        if (!necesitaSucesor) {
+            cout << "El jefe actual (" << jefeActual->dato.name
+                 << ") sigue en condiciones de liderar." << endl;
+            return;
+        }
+
+        cout << "\nEl jefe actual " << jefeActual->dato.name << " "
+             << jefeActual->dato.last_name
+             << " ya no puede liderar. Buscando un sucesor..." << endl;
+
+        NodoArbol *antiguoJefe = jefeActual;
+        NodoArbol *nuevoJefe = nullptr;
+
+        // Regla: Si el jefe muere/va a prisión/envejece, el sucesor es el
+        // primer sucesor vivo y libre en su árbol.
+        nuevoJefe = _buscarSucesorEnSubarbol(antiguoJefe->izquierdo);
+        if (nuevoJefe == nullptr) {
+            nuevoJefe = _buscarSucesorEnSubarbol(antiguoJefe->derecho);
+        }
+
+        // Regla: Si no hay sucesores directos, buscar en el árbol del "hermano"
+        // del jefe, subiendo en la jerarquía.
+        if (nuevoJefe == nullptr) {
+            NodoArbol *ancestro = antiguoJefe;
+            while (ancestro->padre != nullptr && nuevoJefe == nullptr) {
+                NodoArbol *padreAncestro = ancestro->padre;
+                NodoArbol *tio = (padreAncestro->izquierdo == ancestro)
+                                     ? padreAncestro->derecho
+                                     : padreAncestro->izquierdo;
+
+                if (tio != nullptr) {
+                    // Buscar un sucesor en el subárbol del "tío"
+                    nuevoJefe = _buscarSucesorEnSubarbol(tio);
+
+                    // Regla: Si el "tío" está vivo y libre y no tiene
+                    // sucesores válidos, él se convierte en jefe.
+                    if (nuevoJefe == nullptr && !tio->dato.is_dead &&
+                        !tio->dato.in_jail) {
+                        nuevoJefe = tio;
+                    }
+                }
+                ancestro = padreAncestro;
+            }
+        }
+        asignarNuevoJefe(nuevoJefe, antiguoJefe);
+    }
+
     NodoArbol *encontrarPorId(int id) {
         return buscarPorId(raiz, id);
     }
@@ -263,3 +368,62 @@ public:
         return true;
     }
 };
+
+int main() {
+    ArbolFamilia familia;
+    if (!familia.cargarDesdeCsv("datos_familia.csv")) {
+        cerr << "Error: No se pudo cargar el archivo 'datos_familia.csv'.\n"
+             << "Asegúrese de que el archivo exista en la carpeta 'bin' y que el "
+                "programa se ejecute desde allí."
+             << endl;
+        return 1;
+    }
+
+    cout << "Árbol familiar cargado exitosamente." << endl;
+
+    string input;
+    while (true) {
+        cout << "\n--- Menú Principal ---" << endl;
+        cout << "1. Mostrar línea de sucesión actual" << endl;
+        cout << "2. Modificar miembro de la familia" << endl;
+        cout << "3. Resolver sucesión (si es necesario)" << endl;
+        cout << "4. Salir" << endl;
+        cout << "Seleccione una opción: ";
+        getline(cin, input);
+
+        if (input == "1") {
+            familia.mostrarLineaDeSucesion();
+        } else if (input == "2") {
+            cout << "Introduzca el ID del miembro a modificar: ";
+            getline(cin, input);
+            try {
+                int id_to_edit = stoi(input);
+                NodoArbol *nodo = familia.encontrarPorId(id_to_edit);
+                if (nodo) {
+                    Persona p = nodo->dato;
+                    cout << "Modificando a " << p.name
+                         << ". Marcar como muerto? (1=si, 0=no): ";
+                    getline(cin, input);
+                    if (input == "1") {
+                        p.is_dead = true;
+                        familia.editarNodo(id_to_edit, p);
+                        cout << p.name << " ha sido marcado como muerto." << endl;
+                    }
+                } else {
+                    cout << "ID no encontrado." << endl;
+                }
+            } catch (const std::invalid_argument &ia) {
+                cerr << "Entrada inválida. Por favor ingrese un número." << endl;
+            }
+        } else if (input == "3") {
+            familia.resolverSucesion();
+        } else if (input == "4") {
+            cout << "Saliendo del programa." << endl;
+            break;
+        } else {
+            cout << "Opción no válida. Intente de nuevo." << endl;
+        }
+    }
+
+    return 0;
+}
