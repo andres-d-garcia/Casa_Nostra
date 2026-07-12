@@ -24,6 +24,8 @@
 ## 5. Datos de prueba
 - [ ] Crear un archivo CSV con datos de ejemplo para probar la aplicación
 - [ ] Verificar que el programa cargue correctamente los datos
+- [x] Crear un archivo CSV con datos de ejemplo para probar la aplicación
+- [x] Verificar que el programa cargue correctamente los datos
 
 ## 6. Documentación
 - [ ] Crear un README.md con una explicación del proyecto
