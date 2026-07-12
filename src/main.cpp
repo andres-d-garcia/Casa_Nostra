@@ -390,17 +390,35 @@ void mostrarDetallesPersona(const Persona& p) {
 int main(int argc, char *argv[]) {
     ArbolFamilia familia;
     string ruta_csv;
+    bool cargado = false;
 
     if (argc > 1) {
         ruta_csv = argv[1];
         cout << "Intentando cargar desde la ruta proporcionada: " << ruta_csv << endl;
+        cargado = familia.cargarDesdeCsv(ruta_csv);
     } else {
+        // Intenta la ruta relativa a la raíz del proyecto
         ruta_csv = "bin/datos_familia.csv";
+        cargado = familia.cargarDesdeCsv(ruta_csv);
+
+        // Si falla, intenta la ruta relativa a la carpeta 'bin'
+        if (!cargado) {
+            ruta_csv = "datos_familia.csv";
+            cargado = familia.cargarDesdeCsv(ruta_csv);
+        }
+
+        // Si falla, intenta la ruta relativa a la carpeta 'src'
+        if (!cargado) {
+            ruta_csv = "../bin/datos_familia.csv";
+            cargado = familia.cargarDesdeCsv(ruta_csv);
+        }
     }
 
-    if (!familia.cargarDesdeCsv(ruta_csv)) {
-        cerr << "Error: No se pudo cargar el archivo '" << ruta_csv << "'.\n"
-             << "Asegúrese de que la ruta sea correcta o ejecute el programa desde la carpeta raíz del proyecto."
+    if (!cargado) {
+        cerr << "Error: No se pudo cargar el archivo 'datos_familia.csv'.\n"
+             << "Asegúrese de que el archivo exista en la carpeta 'bin' y que el "
+                "programa se ejecute desde la raíz del proyecto, la carpeta 'src' o "
+                "la misma carpeta 'bin'."
              << endl;
         return 1;
     }

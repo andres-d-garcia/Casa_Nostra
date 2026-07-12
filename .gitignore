@@ -1,2 +1,7 @@
-# Ignorar el ejecutable si aparece en la carpeta src (petición específica)
-src/main.exe
+# Archivos de compilación y ejecutables
+
+# Ignorar la carpeta de salida de compilación
+bin/
+
+# Ignorar archivos ejecutables en cualquier carpeta
+*.exe
