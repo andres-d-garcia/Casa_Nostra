@@ -1,2 +1,2 @@
-bin/main.exe
+# Ignorar el ejecutable si aparece en la carpeta src (petición específica)
 src/main.exe
