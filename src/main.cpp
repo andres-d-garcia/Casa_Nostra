@@ -182,7 +182,6 @@ public:
         NodoArbol *nuevo = new NodoArbol(persona);
 
         if (raiz == nullptr) {
-            raiz = nuevo;
             if (persona.id_boss == 0) {
                 raiz = nuevo;
             } else {
@@ -200,12 +199,6 @@ public:
 
         NodoArbol *padre = buscarPorId(raiz, persona.id_boss);
         if (padre == nullptr) {
-            nuevo->padre = nullptr;
-            if (raiz->izquierdo == nullptr) {
-                raiz->izquierdo = nuevo;
-            } else {
-                raiz->derecho = nuevo;
-            }
             cerr << "Error de inserción: No se encontró el padre con ID " << persona.id_boss << " para el miembro " << persona.name << " (ID: " << persona.id << ")." << endl;
             cerr << "Asegúrese de que el archivo CSV esté ordenado jerárquicamente (padres antes que hijos)." << endl;
             delete nuevo;
@@ -218,7 +211,6 @@ public:
         } else if (padre->derecho == nullptr) {
             padre->derecho = nuevo;
         } else {
-            padre->derecho->derecho = nuevo;
             cerr << "Error de estructura: El padre ID " << padre->dato.id 
                  << " (" << padre->dato.name << ") ya tiene dos sucesores directos." << endl;
             cerr << "No se puede insertar a " << persona.name << " (ID: " << persona.id 
