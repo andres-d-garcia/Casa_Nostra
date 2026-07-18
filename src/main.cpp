@@ -145,6 +145,43 @@ private:
         return _buscarSucesorEnSubarbol(subRaiz->derecho, incluirPresos);
     }
 
+    NodoArbol* _encontrarSucesorDirecto(NodoArbol* jefe, bool incluirPresos) {
+        if (jefe == nullptr) {
+            return nullptr;
+        }
+
+        // Buscar en la rama del primer hijo (izquierdo)
+        NodoArbol* sucesor = _buscarSucesorEnSubarbol(jefe->izquierdo, incluirPresos);
+        if (sucesor != nullptr) {
+            return sucesor;
+        }
+
+        // Si no se encuentra, buscar en la rama del segundo hijo (derecho)
+        return _buscarSucesorEnSubarbol(jefe->derecho, incluirPresos);
+    }
+
+    NodoArbol* _encontrarSucesorColateral(NodoArbol* miembro, bool incluirPresos) {
+        if (miembro == nullptr || miembro->padre == nullptr) {
+            return nullptr; // Llegamos a la raíz o más allá, no hay más ramas colaterales
+        }
+
+        NodoArbol* padre = miembro->padre;
+        // El "tío" es el otro hijo del padre del miembro actual
+        NodoArbol* tio = (padre->izquierdo == miembro) ? padre->derecho : padre->izquierdo;
+
+        if (tio != nullptr) {
+            // Buscar un sucesor en toda la rama del tío
+            NodoArbol* sucesor = _buscarSucesorEnSubarbol(tio, incluirPresos);
+            if (sucesor != nullptr) {
+                return sucesor; // Encontrado
+            }
+        }
+        
+        // Si no se encuentra en la rama del tío, la crisis de sucesión sube un nivel.
+        // Buscamos en la rama colateral del padre.
+        return _encontrarSucesorColateral(padre, incluirPresos);
+    }
+
     void asignarNuevoJefe(NodoArbol *nuevoJefe, NodoArbol *antiguoJefe) {
         if (antiguoJefe != nullptr) {
             antiguoJefe->dato.is_boss = false;
@@ -157,11 +194,11 @@ private:
             nuevoJefe->dato.is_boss = true;
             jefeActual = nuevoJefe;
 
-            cout << "\n¡NUEVO JEFE ASIGNADO!" << endl;
+            cout << "\nNUEVO JEFE ASIGNADO!" << endl;
             cout << "El nuevo jefe de la familia es: " << nuevoJefe->dato.name << " "
                  << nuevoJefe->dato.last_name << endl;
         } else {
-            cout << "\nCRISIS DE SUCESIÓN: No se pudo encontrar un nuevo jefe para la "
+            cout << "\nCRISIS DE SUCESION: No se pudo encontrar un nuevo jefe para la "
                     "familia."
                  << endl;
             if (antiguoJefe != nullptr) {
@@ -185,22 +222,22 @@ public:
             if (persona.id_boss == 0) {
                 raiz = nuevo;
             } else {
-                cerr << "Error: El árbol está vacío, pero el primer miembro (ID: " << persona.id << ") no es el jefe principal (id_boss != 0)." << endl;
+                cerr << "Error: El arbol esta vacio, pero el primer miembro (ID: " << persona.id << ") no es el jefe principal (id_boss != 0)." << endl;
                 delete nuevo;
             }
             return;
         }
 
         if (persona.id_boss == 0) {
-            cerr << "Error: Se encontró un segundo miembro (ID: " << persona.id << ") con id_boss=0. Solo puede haber una raíz." << endl;
+            cerr << "Error: Se encontro un segundo miembro (ID: " << persona.id << ") con id_boss=0. Solo puede haber una raiz." << endl;
             delete nuevo;
             return;
         }
 
         NodoArbol *padre = buscarPorId(raiz, persona.id_boss);
         if (padre == nullptr) {
-            cerr << "Error de inserción: No se encontró el padre con ID " << persona.id_boss << " para el miembro " << persona.name << " (ID: " << persona.id << ")." << endl;
-            cerr << "Asegúrese de que el archivo CSV esté ordenado jerárquicamente (padres antes que hijos)." << endl;
+            cerr << "Error de insercion: No se encontro el padre con ID " << persona.id_boss << " para el miembro " << persona.name << " (ID: " << persona.id << ")." << endl;
+            cerr << "Asegurese de que el archivo CSV este ordenado jerarquicamente (padres antes que hijos)." << endl;
             delete nuevo;
             return;
         }
@@ -214,7 +251,7 @@ public:
             cerr << "Error de estructura: El padre ID " << padre->dato.id 
                  << " (" << padre->dato.name << ") ya tiene dos sucesores directos." << endl;
             cerr << "No se puede insertar a " << persona.name << " (ID: " << persona.id 
-                 << ") como tercer sucesor directo. El modelo actual es un árbol binario." << endl;
+                 << ") como tercer sucesor directo. El modelo actual es un arbol binario." << endl;
             delete nuevo;
         }
     }
@@ -291,7 +328,7 @@ public:
             return;
         }
 
-        cout << "\n--- Línea de Sucesión Actual (solo miembros vivos) ---\n"
+        cout << "\n--- Linea de Sucesion Actual (solo miembros vivos) ---\n"
              << endl;
         _mostrarSucesoresVivos(jefeActual, 0);
         cout << "\n-----------------------------------------------------\n"
@@ -300,7 +337,7 @@ public:
 
     void resolverSucesion() {
         if (jefeActual == nullptr) {
-            cout << "No hay un jefe actual para resolver la sucesión." << endl;
+            cout << "No hay un jefe actual para resolver la sucesion." << endl;
             return;
         }
 
@@ -324,27 +361,15 @@ public:
         for (int i = 0; i < 2 && nuevoJefe == nullptr; ++i) {
             bool incluirPresos = (i == 1);
             if (incluirPresos) {
-                cout << "No se encontraron sucesores libres. Ampliando la búsqueda para incluir miembros encarcelados..." << endl;
+                cout << "No se encontraron sucesores libres. Ampliando la busqueda para incluir miembros encarcelados..." << endl;
             }
 
-            nuevoJefe = _buscarSucesorEnSubarbol(antiguoJefe->izquierdo, incluirPresos);
-            if (nuevoJefe == nullptr) {
-                nuevoJefe = _buscarSucesorEnSubarbol(antiguoJefe->derecho, incluirPresos);
-            }
+            // 1. Buscar en la línea de sucesión directa (hijos, nietos, etc.)
+            nuevoJefe = _encontrarSucesorDirecto(antiguoJefe, incluirPresos);
 
+            // 2. Si no hay sucesor directo, buscar en líneas colaterales (hermanos del jefe, sobrinos, etc.)
             if (nuevoJefe == nullptr) {
-                NodoArbol *ancestro = antiguoJefe;
-                while (ancestro->padre != nullptr && nuevoJefe == nullptr) {
-                    NodoArbol *padreAncestro = ancestro->padre;
-                    NodoArbol *tio = (padreAncestro->izquierdo == ancestro)
-                                         ? padreAncestro->derecho
-                                         : padreAncestro->izquierdo;
-
-                    if (tio != nullptr) {
-                        nuevoJefe = _buscarSucesorEnSubarbol(tio, incluirPresos);
-                    }
-                    ancestro = padreAncestro;
-                }
+                nuevoJefe = _encontrarSucesorColateral(antiguoJefe, incluirPresos);
             }
         }
 
@@ -377,11 +402,11 @@ void mostrarDetallesPersona(const Persona& p) {
     cout << "\n--- Detalles del Miembro ---" << endl;
     cout << "ID: " << p.id << endl;
     cout << "Nombre: " << p.name << " " << p.last_name << endl;
-    cout << "Género: " << p.gender << endl;
+    cout << "Genero: " << p.gender << endl;
     cout << "Edad: " << p.age << endl;
     cout << "ID Jefe: " << p.id_boss << endl;
     cout << "Estado: " << (p.is_dead ? "Muerto" : "Vivo") << endl;
-    cout << "Situación: " << (p.in_jail ? "En la cárcel" : "Libre") << endl;
+    cout << "Situacion: " << (p.in_jail ? "En la carcel" : "Libre") << endl;
     cout << "Jefe actual: " << (p.is_boss ? "Sí" : "No") << endl;
     cout << "Fue jefe: " << (p.was_boss ? "Sí" : "No") << endl;
     cout << "---------------------------\n";
@@ -423,16 +448,16 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    cout << "Árbol familiar cargado exitosamente." << endl;
+    cout << "Arbol familiar cargado exitosamente." << endl;
 
     string input;
     while (true) {
-        cout << "\n--- Menú Principal ---" << endl;
-        cout << "1. Mostrar línea de sucesión actual" << endl;
+        cout << "\n--- Menu Principal ---" << endl;
+        cout << "1. Mostrar linea de sucesion actual" << endl;
         cout << "2. Modificar miembro de la familia" << endl;
-        cout << "3. Resolver sucesión (si es necesario)" << endl;
+        cout << "3. Resolver sucesion (si es necesario)" << endl;
         cout << "4. Salir" << endl;
-        cout << "Seleccione una opción: ";
+        cout << "Seleccione una opcion: ";
         getline(cin, input);
 
         if (input == "1") {
@@ -447,13 +472,13 @@ int main(int argc, char *argv[]) {
                     Persona p = nodo->dato;
                     mostrarDetallesPersona(p);
 
-                    cout << "--- Menú de Edición ---" << endl;
+                    cout << "--- Menu de Edicion ---" << endl;
                     cout << "1. Editar nombre" << endl;
                     cout << "2. Editar apellido" << endl;
-                    cout << "3. Editar género" << endl;
+                    cout << "3. Editar genero" << endl;
                     cout << "4. Editar edad" << endl;
                     cout << "5. Cambiar estado (muerto/vivo)" << endl;
-                    cout << "6. Cambiar situación (cárcel/libre)" << endl;
+                    cout << "6. Cambiar situacion (carcel/libre)" << endl;
                     cout << "7. Cancelar" << endl;
                     cout << "Seleccione el campo a modificar: ";
                     getline(cin, input);
@@ -470,13 +495,13 @@ int main(int argc, char *argv[]) {
                         getline(cin, p.last_name);
                         cambioRealizado = true;
                     } else if (input == "3") {
-                        cout << "Nuevo género (H/M): ";
+                        cout << "Nuevo genero (H/M): ";
                         getline(cin, newValue);
                         if (!newValue.empty() && (toupper(newValue[0]) == 'H' || toupper(newValue[0]) == 'M')) {
                             p.gender = toupper(newValue[0]);
                             cambioRealizado = true;
                         } else {
-                            cout << "Género inválido. No se realizaron cambios." << endl;
+                            cout << "Genero invalido. No se realizaron cambios." << endl;
                         }
                     } else if (input == "4") {
                         cout << "Nueva edad: ";
@@ -485,25 +510,25 @@ int main(int argc, char *argv[]) {
                             p.age = stoi(newValue);
                             cambioRealizado = true;
                         } catch (const std::invalid_argument &ia) {
-                            cout << "Edad inválida. No se realizaron cambios." << endl;
+                            cout << "Edad invalida. No se realizaron cambios." << endl;
                         }
                     } else if (input == "5") {
-                        cout << "¿Está muerto? (1=si, 0=no): ";
+                        cout << "Esta muerto? (1=si, 0=no): ";
                         getline(cin, newValue);
                         if (newValue == "1" || newValue == "0") {
                             p.is_dead = (newValue == "1");
                             cambioRealizado = true;
                         } else {
-                            cout << "Opción inválida. No se realizaron cambios." << endl;
+                            cout << "Opcion invalida. No se realizaron cambios." << endl;
                         }
                     } else if (input == "6") {
-                        cout << "¿Está en la cárcel? (1=si, 0=no): ";
+                        cout << "Esta en la carcel? (1=si, 0=no): ";
                         getline(cin, newValue);
                         if (newValue == "1" || newValue == "0") {
                             p.in_jail = (newValue == "1");
                             cambioRealizado = true;
                         } else {
-                            cout << "Opción inválida. No se realizaron cambios." << endl;
+                            cout << "Opcion invalida. No se realizaron cambios." << endl;
                         }
                     }
 
@@ -515,7 +540,7 @@ int main(int argc, char *argv[]) {
                     cout << "ID no encontrado." << endl;
                 }
             } catch (const std::invalid_argument &ia) {
-                cerr << "Entrada inválida. Por favor ingrese un número para el ID." << endl;
+                cerr << "Entrada invalida. Por favor ingrese un numero para el ID." << endl;
             }
         } else if (input == "3") {
             familia.resolverSucesion();
@@ -523,7 +548,7 @@ int main(int argc, char *argv[]) {
             cout << "Saliendo del programa." << endl;
             break;
         } else {
-            cout << "Opción no válida. Intente de nuevo." << endl;
+            cout << "Opcion no valida. Intente de nuevo." << endl;
         }
     }
 
