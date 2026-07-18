@@ -1,5 +1,5 @@
-id, name   , last_name, gender, age, id_boss, is_dead, in_jail, was_boss, is_boss
- 1, Vito   , Corleone , H     ,  72,       0,       0,       0,        0,       1
- 2, Santino, Corleone , H     ,  40,       1,       0,       1,        0,       0
- 3, Fredo  , Corleone , H     ,  38,       1,       0,       0,        0,       0
- 4, Michael, Corleone , H     ,  35,       2,       0,       0,        0,       0
+id,name,last_name,gender,age,id_boss,is_dead,in_jail,was_boss,is_boss
+1,Don_Alfonso,Maranzano,H,65,0,1,0,1,0
+2,Giovanni,Maranzano,H,42,1,1,0,0,1
+3,Marco,Maranzano,H,38,1,0,0,0,0
+4,Carlo,Maranzano,H,19,3,0,0,0,0

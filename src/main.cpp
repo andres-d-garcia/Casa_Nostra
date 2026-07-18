@@ -323,14 +323,14 @@ public:
     }
 
     void mostrarLineaDeSucesion() const {
-        if (jefeActual == nullptr) {
-            cout << "No se ha asignado un jefe actual en la familia." << endl;
+        if (raiz == nullptr) {
+            cout << "El arbol familiar esta vacio." << endl;
             return;
         }
 
         cout << "\n--- Linea de Sucesion Actual (solo miembros vivos) ---\n"
              << endl;
-        _mostrarSucesoresVivos(jefeActual, 0);
+        _mostrarSucesoresVivos(raiz, 0);
         cout << "\n-----------------------------------------------------\n"
              << endl;
     }
