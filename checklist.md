@@ -26,10 +26,10 @@
 - [x] Verificar que el programa cargue correctamente los datos
 
 ## 6. Documentación
-- [] Crear un README.md con una explicación del proyecto
+- [x] Crear un README.md con una explicación del proyecto
 - [x] Explicar cómo compilar y ejecutar la aplicación
 
 ## 7. Verificación final
-- [ ] Compilar el proyecto sin errores
-- [ ] Ejecutar la aplicación con datos de prueba
-- [ ] Revisar que las funcionalidades principales funcionen
+- [x] Compilar el proyecto sin errores
+- [x] Ejecutar la aplicación con datos de prueba
+- [x] Revisar que las funcionalidades principales funcionen
